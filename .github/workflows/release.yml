@@ -35,7 +35,7 @@ jobs:
                   cp -r build/extension.js build/prefs.js build/src stage/
                   cp metadata.json stylesheet.css LICENSE README.md RELEASES.md stage/
                   cp -r icons po stage/
-                  cp schemas/org.gnome.shell.extensions.astra-monitor.gschema.xml stage/schemas/
+                  cp schemas/org.gnome.shell.extensions.astra-monitor-luyanfeng.gschema.xml stage/schemas/
                   glib-compile-schemas stage/schemas
                   for po in po/*.po; do
                       lang=$(basename "$po" .po)
