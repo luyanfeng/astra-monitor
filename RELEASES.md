@@ -1,4 +1,6 @@
-# Astra Monitor 0.0.1 - November 11 2026
+# Astra Monitor 0.0.2 - November 11 2026
+
+_Replaces v0.0.1, which shipped the upstream extension UUID and conflicted with the original extension. Install only this release._
 
 Fork release: curated fixes on top of Astra Monitor 43.
 

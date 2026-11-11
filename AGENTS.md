@@ -1,6 +1,6 @@
 # AGENTS.md — Astra Monitor
 
-GNOME Shell top-bar system-monitor extension (uuid `monitor@astraext.github.io`), TypeScript compiled to GJS. GNOME Shell 45–51.
+GNOME Shell top-bar system-monitor extension (uuid `monitor@luyanfeng.github.io`), TypeScript compiled to GJS. GNOME Shell 45–51.
 
 ## Architecture
 
@@ -16,10 +16,10 @@ GNOME Shell top-bar system-monitor extension (uuid `monitor@astraext.github.io`)
 - Compile: `npx tsc` → outputs to `build/` (NOT `dist/`, despite README's `compile.sh` description; `dist/` is transient staging, deleted after pack/test). TypeScript is not a devDependency; the shell scripts require a global `tsc` on PATH, but `node_modules/.bin/tsc` exists, so prefer `npx tsc`.
 - **Known tsc baseline:** `npx tsc` currently exits 2 with a large set of pre-existing type errors — `@girs/*` ambient-d.ts conflicts in `node_modules` plus GObject-class typing errors in `src/` (many in `*Graph.ts`). JS is still emitted to `build/`. Don't assume your change caused this; check whether your files appear in the error list and whether the error count grew. All shell scripts gate on tsc's exit code, so they abort while this baseline exists.
 - Schemas: `bash ./schemas.sh` (`glib-compile-schemas`). Scripts auto-compile if `schemas/gschemas.compiled` is missing (gitignored).
-- Translations: run `bash ./i18n.sh` after adding user-facing strings (xgettext over `build/**/*.js` → `po/monitor@astraext.pot`, then msgmerge all `po/*.po`; needs `jq` and gettext).
-- Pack: `bash ./pack.sh` — schemas → wipes `build/` → tsc → **`npm run format` (rewrites source files)** → i18n → stages to `dist/` → `gnome-extensions pack` → `monitor@astraext.github.io.shell-extension.zip` at repo root.
+- Translations: run `bash ./i18n.sh` after adding user-facing strings (xgettext over `build/**/*.js` → `po/monitor@luyanfeng.github.io.pot`, then msgmerge all `po/*.po`; needs `jq` and gettext).
+- Pack: `bash ./pack.sh` — schemas → wipes `build/` → tsc → **`npm run format` (rewrites source files)** → i18n → stages to `dist/` → `gnome-extensions pack` → `monitor@luyanfeng.github.io.shell-extension.zip` at repo root.
 - Live test: `bash ./test.sh` — compiles, packs, and **installs into your real GNOME session** (`gnome-extensions install --force`), then launches an isolated nested shell: GNOME ≥49 requires `mutter-devkit` (`gnome-shell --devkit`); older versions use Xephyr on `:2`. Sets `SHELL_DEBUG=all` for logs.
-- **Updating the running extension (MANDATORY order, user rule):** when changing anything under `~/.local/share/gnome-shell/extensions/monitor@astraext.github.io/`, you must (1) disable the extension, (2) **remove the old extension directory entirely** (move it aside as backup), (3) **move the newly built package in as a whole**, (4) enable the extension. NEVER replace individual files inside a live extension directory and NEVER toggle disable/enable as a hot-reload trick — this has crashed the GNOME Shell session (observed full session logout). Note: JS code changes still require a logout/login to take effect (GJS module cache survives disable/enable).
+- **Updating the running extension (MANDATORY order, user rule):** when changing anything under `~/.local/share/gnome-shell/extensions/monitor@luyanfeng.github.io/`, you must (1) disable the extension, (2) **remove the old extension directory entirely** (move it aside as backup), (3) **move the newly built package in as a whole**, (4) enable the extension. NEVER replace individual files inside a live extension directory and NEVER toggle disable/enable as a hot-reload trick — this has crashed the GNOME Shell session (observed full session logout). Note: JS code changes still require a logout/login to take effect (GJS module cache survives disable/enable).
 - EGO upload validation: `bash ./ego.sh` — build + pack + `shexli` (mirrors extensions.gnome.org checks; creates a python venv).
 - Format: `npm run format` (prettier + eslint --fix). There is no separate lint script, no CI, and no unit-test suite (`benchmarks/` are manual perf scripts backing `COMPARISON.md`).
 

@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="monitor@astraext.github.io">
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.temperature-unit">
+<schemalist gettext-domain="monitor@luyanfeng.github.io">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.temperature-unit">
     <value nick="celsius" value="0"/>
     <value nick="fahrenheit" value="1"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.panel-box">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.panel-box">
     <value nick="left" value="0"/>
     <value nick="center" value="1"/>
     <value nick="right" value="2"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.theme-style">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.theme-style">
     <value nick="dark" value="0"/>
     <value nick="light" value="1"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.shell-bar-position">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.shell-bar-position">
     <value nick="top" value="0"/>
     <value nick="bottom" value="1"/>
     <value nick="left" value="2"/>
     <value nick="right" value="3"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.memory-used">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.memory-used">
     <value nick="total-free-buffers-cached" value="0"/>
     <value nick="total-free" value="1"/>
     <value nick="total-available" value="2"/>
     <value nick="active" value="3"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.compact-mode-activation">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.compact-mode-activation">
     <value nick="both" value="0"/>
     <value nick="click" value="1"/>
     <value nick="hover" value="2"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.data-unit">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.data-unit">
     <value nick="kB/s" value="0"/>
     <value nick="KiB/s" value="1"/>
     <value nick="kb/s" value="2"/>
@@ -43,7 +43,7 @@
     <value nick="k " value="9"/>
     <value nick="Ki" value="10"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.data-unit2">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.data-unit2">
     <value nick="kB-kiB" value="0"/>
     <value nick="kB-KB" value="1"/>
     <value nick="kiB" value="2"/>
@@ -52,38 +52,38 @@
     <value nick="k " value="5"/>
     <value nick="Ki" value="6"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.processor-frequency-mode">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.processor-frequency-mode">
     <value nick="average" value="0"/>
     <value nick="max" value="1"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.source-list1">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list1">
     <value nick="auto" value="0"/>
     <value nick="proc" value="1"/>
     <value nick="GTop" value="2"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.source-list2">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list2">
     <value nick="auto" value="0"/>
     <value nick="GTop" value="1"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.source-list3">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list3">
     <value nick="auto" value="0"/>
     <value nick="proc" value="1"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.source-list4">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list4">
     <value nick="auto" value="0"/>
     <value nick="hwmon" value="1"/>
     <value nick="lm-sensors" value="2"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.source-list5">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list5">
     <value nick="auto" value="0"/>
     <value nick="iwconfig" value="1"/>
     <value nick="iw" value="2"/>
   </enum>
-  <enum id="org.gnome.shell.extensions.astra-monitor.enum.source-list6">
+  <enum id="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list6">
     <value nick="auto" value="0"/>
     <value nick="nethogs" value="1"/>
   </enum>
-  <schema id="org.gnome.shell.extensions.astra-monitor" path="/org/gnome/shell/extensions/astra-monitor/">
+  <schema id="org.gnome.shell.extensions.astra-monitor-luyanfeng" path="/org/gnome/shell/extensions/astra-monitor-luyanfeng/">
     <!-- UTILS -->
     <key name="debug-mode" type="b">
       <default>false</default>
@@ -115,7 +115,7 @@
       <description>Seconds to wait before placing the headers</description>
       <range min="1" max="10"/>
     </key>
-    <key name="panel-box" enum="org.gnome.shell.extensions.astra-monitor.enum.panel-box">
+    <key name="panel-box" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.panel-box">
       <default>'right'</default>
       <summary>Panel Box Position</summary>
       <description>Which panel box to use to display the monitors</description>
@@ -143,12 +143,12 @@
       <summary>Order of the monitors</summary>
       <description>From left to right, the order of the monitors</description>
     </key>
-    <key name="theme-style" enum="org.gnome.shell.extensions.astra-monitor.enum.theme-style">
+    <key name="theme-style" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.theme-style">
       <default>'dark'</default>
       <summary>Preferred Theme Style</summary>
       <description>Select the preferred theme style</description>
     </key>
-    <key name="shell-bar-position" enum="org.gnome.shell.extensions.astra-monitor.enum.shell-bar-position">
+    <key name="shell-bar-position" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.shell-bar-position">
       <default>'top'</default>
       <summary>Topbar/dash screen position</summary>
       <description>The position of the topbar/dash on the screen</description>
@@ -180,7 +180,7 @@
       <summary>Compact Mode</summary>
       <description>Enable compact mode</description>
     </key>
-    <key name="compact-mode-activation" enum="org.gnome.shell.extensions.astra-monitor.enum.compact-mode-activation">
+    <key name="compact-mode-activation" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.compact-mode-activation">
       <default>'both'</default>
       <summary>Compact Mode Activation</summary>
       <description>How to expand the headers</description>
@@ -208,22 +208,22 @@
       <description>Seconds between CPU statistics updates</description>
       <range min="0.1" max="10"/>
     </key>
-    <key name="processor-source-cpu-usage" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list1">
+    <key name="processor-source-cpu-usage" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list1">
       <default>'auto'</default>
       <summary>Cpu Usage Source</summary>
       <description>Source of the cpu usage</description>
     </key>
-    <key name="processor-source-cpu-cores-usage" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list1">
+    <key name="processor-source-cpu-cores-usage" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list1">
       <default>'auto'</default>
       <summary>Cpu Cores Usage Source</summary>
       <description>Source of the cpu cores usage</description>
     </key>
-    <key name="processor-source-top-processes" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list1">
+    <key name="processor-source-top-processes" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list1">
       <default>'auto'</default>
       <summary>Top Processes Source</summary>
       <description>Source of the top processes</description>
     </key>
-    <key name="processor-source-load-avg" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list3">
+    <key name="processor-source-load-avg" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list3">
       <default>'auto'</default>
       <summary>Cpu Load Average Source</summary>
       <description>Source of the cpu load average</description>
@@ -291,7 +291,7 @@
       <description>Max number of figures to show on the frequency value</description>
       <range min="2" max="4"/>
     </key>
-    <key name="processor-header-frequency-mode" enum="org.gnome.shell.extensions.astra-monitor.enum.processor-frequency-mode">
+    <key name="processor-header-frequency-mode" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.processor-frequency-mode">
       <default>'average'</default>
       <summary>CPU Header Frequency Mode</summary>
       <description>Frequency mode of the header of the CPU monitor</description>
@@ -545,22 +545,22 @@
       <description>Seconds between memory statistics updates</description>
       <range min="0.1" max="10"/>
     </key>
-    <key name="memory-unit" enum="org.gnome.shell.extensions.astra-monitor.enum.data-unit2">
+    <key name="memory-unit" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.data-unit2">
       <default>'kB-KB'</default>
       <summary>Memory Unit</summary>
       <description>Unit of measurement for the memory</description>
     </key>
-    <key name="memory-used" enum="org.gnome.shell.extensions.astra-monitor.enum.memory-used">
+    <key name="memory-used" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.memory-used">
       <default>'total-free-buffers-cached'</default>
       <summary>Preferred Used Memory Calculation</summary>
       <description>Select the preferred calculation for the used memory value</description>
     </key>
-    <key name="memory-source-memory-usage" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list1">
+    <key name="memory-source-memory-usage" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list1">
       <default>'auto'</default>
       <summary>Memory Usage Source</summary>
       <description>Source of the memory usage</description>
     </key>
-    <key name="memory-source-top-processes" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list1">
+    <key name="memory-source-top-processes" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list1">
       <default>'auto'</default>
       <summary>Top Processes Source</summary>
       <description>Source of the top processes</description>
@@ -726,7 +726,7 @@
       <description>Seconds between storage IO statistics updates</description>
       <range min="0.1" max="10"/>
     </key>
-    <key name="storage-io-unit" enum="org.gnome.shell.extensions.astra-monitor.enum.data-unit">
+    <key name="storage-io-unit" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.data-unit">
       <default>'kB/s'</default>
       <summary>Storage IO Unit</summary>
       <description>Unit of measurement for the storage IO</description>
@@ -746,17 +746,17 @@
       <summary>Ignored Storage Devices Regex</summary>
       <description>A regex to match Storage Devices to ignore</description>
     </key>
-    <key name="storage-source-storage-usage" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list1">
+    <key name="storage-source-storage-usage" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list1">
       <default>'auto'</default>
       <summary>Storage Usage Source</summary>
       <description>Source of the storage usage</description>
     </key>
-    <key name="storage-source-top-processes" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list2">
+    <key name="storage-source-top-processes" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list2">
       <default>'auto'</default>
       <summary>Top Processes Source</summary>
       <description>Source of the top processes</description>
     </key>
-    <key name="storage-source-storage-io" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list1">
+    <key name="storage-source-storage-io" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list1">
       <default>'auto'</default>
       <summary>Storage IO Source</summary>
       <description>Source of the storage IO</description>
@@ -954,7 +954,7 @@
       <description>Seconds between network IO statistics updates</description>
       <range min="0.1" max="10"/>
     </key>
-    <key name="network-io-unit" enum="org.gnome.shell.extensions.astra-monitor.enum.data-unit">
+    <key name="network-io-unit" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.data-unit">
       <default>'kB/s'</default>
       <summary>Network IO Unit</summary>
       <description>Unit of measurement for the network IO</description>
@@ -969,17 +969,17 @@
       <summary>Ignored Network Interfaces Regex</summary>
       <description>A regex to match Network Interfaces to ignore</description>
     </key>
-    <key name="network-source-network-io" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list1">
+    <key name="network-source-network-io" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list1">
       <default>'auto'</default>
       <summary>Network IO Source</summary>
       <description>Source of the network IO</description>
     </key>
-    <key name="network-source-top-processes" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list6">
+    <key name="network-source-top-processes" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list6">
       <default>'auto'</default>
       <summary>Top Processes Source</summary>
       <description>Source of the top processes</description>
     </key>
-    <key name="network-source-wireless" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list5">
+    <key name="network-source-wireless" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list5">
       <default>'auto'</default>
       <summary>Network Wireless Device Source</summary>
       <description>Source of the wireless device data</description>
@@ -1123,7 +1123,7 @@
       <summary>Sensors Header</summary>
       <description>Show the sensors header</description>
     </key>
-    <key name="sensors-temperature-unit" enum="org.gnome.shell.extensions.astra-monitor.enum.temperature-unit">
+    <key name="sensors-temperature-unit" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.temperature-unit">
       <default>'celsius'</default>
       <summary>Sensors Temperature Unit</summary>
       <description>Temperature Unit of measurement for the sensors</description>
@@ -1143,7 +1143,7 @@
       <summary>Ignored Sensors Attribute Regex</summary>
       <description>A regex to match Sensors Attribute to ignore</description>
     </key>
-    <key name="sensors-source" enum="org.gnome.shell.extensions.astra-monitor.enum.source-list4">
+    <key name="sensors-source" enum="org.gnome.shell.extensions.astra-monitor-luyanfeng.enum.source-list4">
       <default>'auto'</default>
       <summary>Sensors Source</summary>
       <description>Source of sensors</description>

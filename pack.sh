@@ -13,7 +13,7 @@ log_message() {
 # Paths and filenames
 EXTENSION_DIR=$(dirname "$0") # Assumes pack.sh is in the main directory
 DIST_DIR="${EXTENSION_DIR}/dist"
-EXTENSION_NAME="monitor@astraext.github.io"
+EXTENSION_NAME="monitor@luyanfeng.github.io"
 
 # Read VERSION from metadata.json
 if [ -f "${EXTENSION_DIR}/metadata.json" ]; then
@@ -37,7 +37,7 @@ else
 fi
 
 # Remove the previous build if any
-rm -rf "monitor@astraext.github.io.shell-extension.zip"
+rm -rf "monitor@luyanfeng.github.io.shell-extension.zip"
 
 # Clean up build directory
 rm -r "build"

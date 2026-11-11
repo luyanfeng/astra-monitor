@@ -6,7 +6,7 @@ log_message() {
     echo "[`date +"%Y-%m-%d %H:%M:%S"`] $1"
 }
 
-EXTENSION_NAME="monitor@astraext.github.io"
+EXTENSION_NAME="monitor@luyanfeng.github.io"
 XEPHYR_DISPLAY=":2"
 RESOLUTION=1867x1050 # this fits my 4th monitor perfectly, change it to your needs
 

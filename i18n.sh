@@ -53,7 +53,7 @@ cd build || { log_message "Error: Failed to change directory to build"; exit 1; 
 # Generate pot file from .js files, excluding node_modules directory
 log_message "Generating POT file..."
 JS_FILES=$(find . -name '*.js' -type f)
-xgettext --language=JavaScript --from-code=UTF-8 --package-name="$PACKAGE_NAME" --package-version="$PACKAGE_VERSION" --copyright-holder="Lju" --output=../po/monitor@astraext.pot $JS_FILES
+xgettext --language=JavaScript --from-code=UTF-8 --package-name="$PACKAGE_NAME" --package-version="$PACKAGE_VERSION" --copyright-holder="Lju" --output=../po/monitor@luyanfeng.github.io.pot $JS_FILES
 if [ $? -ne 0 ]; then
     log_message "Error: Failed to generate POT file"
     exit 1
@@ -63,23 +63,23 @@ log_message "POT file generated successfully"
 cd - || { log_message "Error: Failed to change directory to $EXTENSION_DIR"; exit 1; }
 
 # Remove duplicate entries from the pot file
-msguniq po/monitor@astraext.pot -o po/monitor@astraext.pot
+msguniq po/monitor@luyanfeng.github.io.pot -o po/monitor@luyanfeng.github.io.pot
 
 # Replace charset in the pot file
-sed -i 's/charset=CHARSET/charset=UTF-8/' po/monitor@astraext.pot
+sed -i 's/charset=CHARSET/charset=UTF-8/' po/monitor@luyanfeng.github.io.pot
 
 # Replace plural forms in the pot file
-sed -i 's/nplurals=INTEGER/nplurals=2/' po/monitor@astraext.pot
-sed -i 's/plural=EXPRESSION/plural=(n != 1)/' po/monitor@astraext.pot
+sed -i 's/nplurals=INTEGER/nplurals=2/' po/monitor@luyanfeng.github.io.pot
+sed -i 's/plural=EXPRESSION/plural=(n != 1)/' po/monitor@luyanfeng.github.io.pot
 
 # Replace language in the pot file
-sed -i 's/Language: /Language: en_US/' po/monitor@astraext.pot
+sed -i 's/Language: /Language: en_US/' po/monitor@luyanfeng.github.io.pot
 
 # Update all .po files with the new .pot file
 log_message "Updating PO files..."
 for po_file in po/*.po; do
     if [ -f "$po_file" ]; then
-        msgmerge -U "$po_file" po/monitor@astraext.pot
+        msgmerge -U "$po_file" po/monitor@luyanfeng.github.io.pot
         if [ $? -eq 0 ]; then
             log_message "Updated $po_file"
         else

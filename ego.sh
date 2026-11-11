@@ -14,7 +14,7 @@ if [ "$#" -ne 0 ]; then
     exit 1
 fi
 
-EXTENSION_NAME="monitor@astraext.github.io"
+EXTENSION_NAME="monitor@luyanfeng.github.io"
 EXTENSION_DIR=$(dirname "$(realpath "$0")")
 DIST_DIR="${EXTENSION_DIR}/dist"
 VENV_DIR="${EXTENSION_DIR}/venv"

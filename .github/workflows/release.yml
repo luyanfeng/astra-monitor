@@ -40,16 +40,16 @@ jobs:
                   for po in po/*.po; do
                       lang=$(basename "$po" .po)
                       mkdir -p "stage/locale/$lang/LC_MESSAGES"
-                      msgfmt -o "stage/locale/$lang/LC_MESSAGES/monitor@astraext.github.io.mo" "$po"
+                      msgfmt -o "stage/locale/$lang/LC_MESSAGES/monitor@luyanfeng.github.io.mo" "$po"
                   done
 
             - name: Pack the extension
               run: |
                   cd stage
-                  zip -r "../monitor@astraext.github.io.shell-extension.zip" .
+                  zip -r "../monitor@luyanfeng.github.io.shell-extension.zip" .
 
             - name: Publish the release
               uses: softprops/action-gh-release@v2
               with:
-                  files: monitor@astraext.github.io.shell-extension.zip
+                  files: monitor@luyanfeng.github.io.shell-extension.zip
                   generate_release_notes: true
