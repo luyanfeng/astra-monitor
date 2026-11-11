@@ -84,6 +84,9 @@ export default class ProcessorMonitor extends Monitor {
 
     private cpuPresent: number[] | null;
     private cpuPresentPromise?: Promise<number[]>;
+
+    private cpuCoreTypes: ('P' | 'E' | null)[] | null = null;
+    private cpuCoreTypesPromise?: Promise<('P' | 'E' | null)[] | null>;
     private dataSources!: ProcessorDataSources;
     private cpuInfo?: CpuInfo;
     private cpuInfoPromise?: Promise<CpuInfo>;
@@ -103,6 +106,9 @@ export default class ProcessorMonitor extends Monitor {
         this.cpuPresent = null;
         this.getCpuTopologyAsync().catch(e => {
             Utils.error('Error loading CPU topology', e);
+        });
+        this.getCpuCoreTypesAsync().catch(e => {
+            Utils.error('Error loading CPU core types', e);
         });
         this.getCpuInfoAsync().catch(e => {
             Utils.error('Error loading CPU info', e);
@@ -408,6 +414,73 @@ export default class ProcessorMonitor extends Monitor {
             });
 
         return this.cpuPresentPromise;
+    }
+
+    /**
+     * Sync cache-only accessor. Returns null while the detection hasn't completed:
+     * callers must render cores untyped in that case.
+     */
+    getCpuCoreTypes(): ('P' | 'E' | null)[] | null {
+        return this.cpuCoreTypes;
+    }
+
+    /**
+     * One-shot detection of Intel hybrid P/E core types, aligned with the CPU
+     * topology order (cpuPresent). Yields null (no marking) when the platform
+     * is not Intel, not hybrid, or the topology data can't be cross-checked.
+     */
+    getCpuCoreTypesAsync(): Promise<('P' | 'E' | null)[] | null> {
+        if(this.cpuCoreTypes !== null) return Promise.resolve(this.cpuCoreTypes);
+        if(this.cpuCoreTypesPromise) return this.cpuCoreTypesPromise;
+
+        this.cpuCoreTypesPromise = (async () => {
+            const topology = await this.getCpuTopologyAsync();
+            if(topology.length === 0) return null;
+
+            const cpuinfo = await Utils.readFileAsync('/proc/cpuinfo', true);
+            const vendorMatch = cpuinfo.match(/^vendor_id\s*:\s*(\S+)/m);
+            if(!vendorMatch || vendorMatch[1] !== 'GenuineIntel') return null;
+
+            const threadCounts: number[] = [];
+            const maxFreqs: number[] = [];
+            for(const cpu of topology) {
+                const coreCpus = await Utils.readFileAsync(
+                    `/sys/devices/system/cpu/cpu${cpu}/topology/core_cpus_list`, true
+                );
+                const maxFreq = await Utils.readFileAsync(
+                    `/sys/devices/system/cpu/cpu${cpu}/cpufreq/cpuinfo_max_freq`, true
+                );
+                if(!coreCpus || !maxFreq) return null;
+
+                const threads = Utils.parseCpuPresentFile(coreCpus);
+                const freq = parseInt(maxFreq, 10);
+                if(threads.length === 0 || isNaN(freq) || freq <= 0) return null;
+
+                threadCounts.push(threads.length);
+                maxFreqs.push(freq);
+            }
+
+            // Hybrid CPUs only: performance cores carry 2 threads, efficient cores exactly 1
+            const pIndices = topology.map((_, i) => i).filter(i => threadCounts[i] > 1);
+            const eIndices = topology.map((_, i) => i).filter(i => threadCounts[i] === 1);
+            if(pIndices.length === 0 || eIndices.length === 0) return null;
+
+            // Cross-check with per-core max frequency: every E core must sit below every P core
+            const pMinFreq = Math.min(...pIndices.map(i => maxFreqs[i]));
+            const eMaxFreq = Math.max(...eIndices.map(i => maxFreqs[i]));
+            if(eMaxFreq >= pMinFreq) return null;
+
+            return topology.map((_, i): 'P' | 'E' => threadCounts[i] > 1 ? 'P' : 'E');
+        })()
+            .then(types => {
+                this.cpuCoreTypes = types;
+                return this.cpuCoreTypes;
+            })
+            .finally(() => {
+                this.cpuCoreTypesPromise = undefined;
+            });
+
+        return this.cpuCoreTypesPromise;
     }
 
     private parseCpuInfoFromLscpu(output: string): CpuInfo {

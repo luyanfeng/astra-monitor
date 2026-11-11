@@ -65,6 +65,7 @@ type CpuCoresUsagePopup = MenuBase & {
             label: St.Label;
         }
     >;
+    coreTypesApplied?: boolean;
 };
 
 type TopProcess = {
@@ -110,6 +111,9 @@ export default class ProcessorMenu extends MenuBase {
 
     constructor(sourceActor: St.Widget, arrowAlignment: number, arrowSide: St.Side) {
         super(sourceActor, arrowAlignment, { name: 'Processor Menu', arrowSide });
+
+        // Wide enough for translated section labels and values to never ellipsize
+        this.setMenuMinWidth();
 
         /*this.cpuSectionLabel = */ this.addMenuSection(_('CPU'));
         this.addName();
@@ -471,17 +475,28 @@ export default class ProcessorMenu extends MenuBase {
             .then(topology => {
                 if(!this.cpuCoresUsagePopup) return;
                 const currentCores = this.cpuCoresUsagePopup.cores?.size ?? 0;
-                if(currentCores === topology.length) return;
+                return Utils.processorMonitor.getCpuCoreTypesAsync().then(types => {
+                    if(!this.cpuCoresUsagePopup) return;
 
-                if(this.cpuCoresUsagePopup.cores) {
-                    for(const core of this.cpuCoresUsagePopup.cores.values()) {
-                        core.bar?.destroy();
-                        core.bar = undefined as any;
+                    // Rebuild the popup when the core count changed, or when the
+                    // detection now yields P/E types that the popup was built without
+                    const hasTypes = !!types && types.some(type => type !== null);
+                    if(
+                        currentCores === topology.length &&
+                        this.cpuCoresUsagePopup.coreTypesApplied === hasTypes
+                    )
+                        return;
+
+                    if(this.cpuCoresUsagePopup.cores) {
+                        for(const core of this.cpuCoresUsagePopup.cores.values()) {
+                            core.bar?.destroy();
+                            core.bar = undefined as any;
+                        }
                     }
-                }
-                this.cpuCoresUsagePopup.close(AnimationUtils.getMenuParams(false));
-                this.cpuCoresUsagePopup.destroy();
-                this.createCoresUsagePopup(hoverButton);
+                    this.cpuCoresUsagePopup.close(AnimationUtils.getMenuParams(false));
+                    this.cpuCoresUsagePopup.destroy();
+                    this.createCoresUsagePopup(hoverButton);
+                });
             })
             .catch(e => {
                 Utils.error('Error updating CPU cores popup', e);
@@ -552,16 +567,53 @@ export default class ProcessorMenu extends MenuBase {
         if(numCores >= 10) defaultStyle = 'width: 3.6em;';
         if(numCores >= 100) defaultStyle = 'width: 4.0em;';
 
+        // Intel hybrid P/E core types, aligned with the topology order; null = not detected
+        const coreTypes = Utils.processorMonitor.getCpuCoreTypes();
+        const lightTheme = Utils.themeStyle === 'light';
+        const typeColors = {
+            P: lightTheme ? '#1f6feb' : '#79b8ff',
+            E: lightTheme ? '#1a7f37' : '#7ee787',
+        };
+
         for(let i = 0; i < numCores; i++) {
             const col = i % numCols;
             const row = Math.floor(i / numCols) * 5;
+            const coreType = coreTypes ? coreTypes[i] : undefined;
+
+            // One container per core keeps the badge and the type tint together
+            const cellLayout = new Clutter.GridLayout({ orientation: Clutter.Orientation.VERTICAL });
+            const cell = new St.Widget({ layoutManager: cellLayout, xExpand: true, yExpand: true });
+
+            const nameRow = new St.Widget({
+                layoutManager: new Clutter.GridLayout({ orientation: Clutter.Orientation.HORIZONTAL }),
+            });
 
             const label = new St.Label({
                 text: 'Core' + (i + 1),
                 styleClass: 'astra-monitor-menu-sub-core',
-                style: row ? defaultStyle + 'margin-top: 1em;' : defaultStyle,
+                style: defaultStyle,
             });
-            grid.addGrid(label, col, row, 1, 1);
+            nameRow.add_child(label);
+
+            if(coreType) {
+                const typeLabel = new St.Label({
+                    text: coreType,
+                    style:
+                        'font-size: 0.7em; font-style: italic; font-weight: bold; ' +
+                        `color: ${typeColors[coreType]}; margin-top: 0.25em;`,
+                });
+                nameRow.add_child(typeLabel);
+
+                const tint = coreType === 'P' ? '121,184,255' : '126,231,135';
+                cell.style =
+                    `margin: ${row ? '1em' : '0'} 0.2em 0.15em; ` +
+                    `background-color: rgba(${tint},0.07); ` +
+                    `border: 1px solid rgba(${tint},0.18); border-radius: 6px; padding: 6px;`;
+            } else {
+                cell.style = `margin: ${row ? '1em' : '0'} 0.2em 0.15em;`;
+            }
+
+            cellLayout.attach(nameRow, 0, 0, 1, 1);
 
             const bar = new ProcessorBars({
                 numBars: 1,
@@ -571,25 +623,27 @@ export default class ProcessorMenu extends MenuBase {
                 height: 3,
                 breakdownConfig: 'processor-menu-core-bars-breakdown',
             });
-            grid.addGrid(bar, col, row + 1, 1, 1);
+            cellLayout.attach(bar, 0, 1, 1, 1);
 
             const percentage = new St.Label({
                 text: '-',
                 styleClass: 'astra-monitor-menu-sub-percentage',
             });
-            grid.addGrid(percentage, col, row + 2, 1, 1);
+            cellLayout.attach(percentage, 0, 2, 1, 1);
 
             const value = new St.Label({
                 text: '-',
                 styleClass: 'astra-monitor-menu-sub-frequency-value',
             });
-            grid.addGrid(value, col, row + 3, 1, 1);
+            cellLayout.attach(value, 0, 3, 1, 1);
 
             const unit = new St.Label({
                 text: _('GHz'),
                 styleClass: 'astra-monitor-menu-sub-frequency-unit',
             });
-            grid.addGrid(unit, col, row + 4, 1, 1);
+            cellLayout.attach(unit, 0, 4, 1, 1);
+
+            grid.addGrid(cell, col, row, 1, 5);
 
             this.cpuCoresUsagePopup.cores.set(i, {
                 bar,
@@ -600,6 +654,8 @@ export default class ProcessorMenu extends MenuBase {
             });
         }
         this.cpuCoresUsagePopup.addToMenu(grid);
+        this.cpuCoresUsagePopup.coreTypesApplied =
+            !!coreTypes && coreTypes.some(type => type !== null);
     }
 
     addTopProcesses() {
@@ -695,7 +751,7 @@ export default class ProcessorMenu extends MenuBase {
     addLoadAverage() {
         this.addMenuSection(_('Load average'));
 
-        const defaultStyle = 'width:200px;';
+        const defaultStyle = `min-width: ${MenuBase.MENU_ROW_MIN_WIDTH}px;`;
         const loadAverageLabelStyle = 'padding:0.05em 0.3em 0 0;';
         const loadAverageValueStyle =
             'width:3.4em;margin-right:0.4em;padding-top:0.05em;text-align:left;';
