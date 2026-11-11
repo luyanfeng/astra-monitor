@@ -26,6 +26,9 @@ jobs:
               # but JS is still emitted: the package only needs the compiled output
               run: npx tsc || true
 
+            - name: Install build tools
+              run: sudo apt-get update && sudo apt-get install -y libglib2.0-bin gettext zip
+
             - name: Assemble the extension package
               run: |
                   mkdir -p stage/schemas
