@@ -102,17 +102,17 @@ msgstr "负载平均"
 #: src/processor/processorMenu.js:534
 msgctxt "short for 1 minute"
 msgid "1m"
-msgstr "1分钟"
+msgstr "1m"
 
 #: src/processor/processorMenu.js:554
 msgctxt "short for 5 minutes"
 msgid "5m"
-msgstr "5分钟"
+msgstr "5m"
 
 #: src/processor/processorMenu.js:574
 msgctxt "short for 15 minutes"
 msgid "15m"
-msgstr "15分钟"
+msgstr "15m"
 
 #: src/processor/processorMenu.js:630
 msgid "System uptime"

@@ -139,8 +139,14 @@ export default class MenuBase extends PopupMenu.PopupMenu {
         }
     }
 
-    static get arrowAlignement() {
-        const shellBarPosition = Config.get_string('shell-bar-position');
+    static readonly MENU_MIN_WIDTH = 300;
+    static readonly MENU_ROW_MIN_WIDTH = 280;
+
+    protected setMenuMinWidth(px: number = MenuBase.MENU_MIN_WIDTH) {
+        if(this.grid) this.grid.style = `min-width: ${px}px;`;
+    }
+
+    static get arrowAlignement() {        const shellBarPosition = Config.get_string('shell-bar-position');
 
         if(shellBarPosition === 'top') return St.Side.TOP;
         if(shellBarPosition === 'bottom') return St.Side.BOTTOM;
