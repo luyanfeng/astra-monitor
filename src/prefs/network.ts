@@ -251,23 +251,27 @@ export default class Network {
         PrefsUtils.addTextInputRow(
             {
                 title: _('Public IPv4 Address'),
-                subtitle: _('Set to empty to disable. Address will be regex matched.'),
+                subtitle: _(
+                    'Leave empty to use built-in sources. Custom address is added first and will be regex matched.'
+                ),
                 tabs: 1,
             },
             'network-source-public-ipv4',
             sourcesSection,
-            'https://api.ipify.org'
+            'https://ip.3322.net'
         );
 
         PrefsUtils.addTextInputRow(
             {
                 title: _('Public IPv6 Address'),
-                subtitle: _('Set to empty to disable. Address will be regex matched.'),
+                subtitle: _(
+                    'Leave empty to use built-in sources. Custom address is added first and will be regex matched.'
+                ),
                 tabs: 1,
             },
             'network-source-public-ipv6',
             sourcesSection,
-            'https://api6.ipify.org'
+            'https://ipv6.icanhazip.com'
         );
 
         const networkWirelessSources = [

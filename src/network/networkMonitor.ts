@@ -83,6 +83,22 @@ export default class NetworkMonitor extends Monitor {
         return 10;
     }
 
+    private static readonly PUBLIC_IP_TIMEOUT_SECONDS = 5;
+    private static readonly PUBLIC_IPV4_SOURCES = [
+        'https://ip.3322.net',
+        'https://api.ip.sb/ip',
+        'https://ipv4.icanhazip.com',
+        'https://api.ipify.org',
+    ];
+    private static readonly PUBLIC_IPV6_SOURCES = [
+        'https://ipv6.icanhazip.com',
+        'https://api6.ipify.org',
+    ];
+    private static readonly PUBLIC_IPV4_REGEX =
+        /(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}/;
+    private static readonly PUBLIC_IPV6_REGEX =
+        /(?:[\da-f]{0,4}:){2,7}(?:(?<ipv4>(?:(?:25[0-5]|2[0-4]\d|1?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|1?\d\d?))|[\da-f]{0,4}|:)/i;
+
     private detectedMaxSpeedsValues: MaxSpeeds;
     private interfaceChecks: Record<string, boolean>;
     private ignored: string[];
@@ -726,22 +742,75 @@ export default class NetworkMonitor extends Monitor {
         return true;
     }
 
+    /**
+     * Concurrently fetches the public IP from all given sources and returns
+     * the first valid match (fastest source wins). Guaranteed to settle within
+     * PUBLIC_IP_TIMEOUT_SECONDS via a dedicated cancellable, so a slow or
+     * unreachable source can never leave the request hanging.
+     */
+    private async fetchPublicIpFromSources(
+        sources: string[],
+        regex: RegExp,
+        taskCancellable: Gio.Cancellable
+    ): Promise<string | null> {
+        const cancellable = new Gio.Cancellable();
+        const cancelSignal = taskCancellable.connect(() => cancellable.cancel());
+        const timeoutId = GLib.timeout_add_seconds(
+            GLib.PRIORITY_DEFAULT,
+            NetworkMonitor.PUBLIC_IP_TIMEOUT_SECONDS,
+            () => {
+                cancellable.cancel();
+                return GLib.SOURCE_REMOVE;
+            }
+        );
+
+        try {
+            if(sources.length === 0) return null;
+            let remaining = sources.length;
+            return await new Promise<string | null>(resolve => {
+                let settled = false;
+                const settle = (ip: string | null) => {
+                    if(settled) return;
+                    settled = true;
+                    resolve(ip);
+                };
+                for(const source of sources) {
+                    Utils.getUrlAsync(source, true, cancellable)
+                        .then(value => {
+                            const match = cancellable.is_cancelled() ? null : value.match(regex);
+                            if(match) settle(match[0]);
+                        })
+                        .catch(() => {
+                            /* FAILED SOURCE */
+                        })
+                        .finally(() => {
+                            remaining--;
+                            if(remaining === 0) settle(null);
+                        });
+                }
+            });
+        } finally {
+            GLib.source_remove(timeoutId);
+            taskCancellable.disconnect(cancelSignal);
+            cancellable.cancel();
+        }
+    }
+
     private async updatePublicIpv4Address(cancellable: Gio.Cancellable): Promise<boolean> {
         if(cancellable.is_cancelled()) return false;
-        const publicIpv4Address = Config.get_string('network-source-public-ipv4');
-        if(!publicIpv4Address) return this.resetIPv4();
+        const customSource = Config.get_string('network-source-public-ipv4');
+        const sources = [
+            ...(customSource ? [customSource] : []),
+            ...NetworkMonitor.PUBLIC_IPV4_SOURCES,
+        ];
 
-        const value = await Utils.getUrlAsync(publicIpv4Address, true, cancellable);
+        const ip = await this.fetchPublicIpFromSources(
+            sources,
+            NetworkMonitor.PUBLIC_IPV4_REGEX,
+            cancellable
+        );
         if(cancellable.is_cancelled()) return false;
-        if(!value) return this.resetIPv4();
-
-        const regex =
-            /(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}/;
-        const match = value.match(regex);
-
-        if(!match) return this.resetIPv4();
-
-        const ip = match[0];
+        if(!ip) return this.resetIPv4();
 
         const currentIp = this.getCurrentValue('publicIpv4Address');
         if(currentIp === ip) return false;
@@ -758,20 +827,19 @@ export default class NetworkMonitor extends Monitor {
 
     private async updatePublicIpv6Address(cancellable: Gio.Cancellable): Promise<boolean> {
         if(cancellable.is_cancelled()) return false;
-        const publicIpv6Address = Config.get_string('network-source-public-ipv6');
-        if(!publicIpv6Address) return this.resetIPv6();
+        const customSource = Config.get_string('network-source-public-ipv6');
+        const sources = [
+            ...(customSource ? [customSource] : []),
+            ...NetworkMonitor.PUBLIC_IPV6_SOURCES,
+        ];
 
-        const value = await Utils.getUrlAsync(publicIpv6Address, true, cancellable);
+        const ip = await this.fetchPublicIpFromSources(
+            sources,
+            NetworkMonitor.PUBLIC_IPV6_REGEX,
+            cancellable
+        );
         if(cancellable.is_cancelled()) return false;
-        if(!value) return this.resetIPv6();
-
-        const regex =
-            /(?:[\da-f]{0,4}:){2,7}(?:(?<ipv4>(?:(?:25[0-5]|2[0-4]\d|1?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|1?\d\d?))|[\da-f]{0,4}|:)/i;
-        const match = value.match(regex);
-
-        if(!match) return this.resetIPv6();
-
-        const ip = match[0];
+        if(!ip) return this.resetIPv6();
 
         const currentIp = this.getCurrentValue('publicIpv6Address');
         if(currentIp === ip) return false;
