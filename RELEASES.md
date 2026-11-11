@@ -1,3 +1,23 @@
+# Astra Monitor 0.0.1 - November 11 2026
+
+Fork release: curated fixes on top of Astra Monitor 43.
+
+### Intel P/E Core Marking
+
+The CPU Cores Usage Info popup now marks Intel hybrid cores: **P** badges (blue) for performance cores and **E** badges (green) for efficient cores, with a tinted background per cell. Detection is one-shot from sysfs (thread count per core, cross-checked with per-core max frequencies) and needs no root. Non-Intel or non-hybrid CPUs render exactly as before.
+
+### Public IP Failover
+
+The network menu now races several public IP sources concurrently and uses the fastest valid answer, with a 5 second timeout: an unreachable default source (e.g. `api.ipify.org`) no longer leaves the Public IP section spinning forever. A custom source configured in the preferences is tried first.
+
+### Menu Widths Normalized
+
+The processor and memory menus share a common minimum width (no more ellipsized text in fixed-width rows, like the load average labels), and the load average row renders short untranslated `1m/5m/15m` labels in Chinese.
+
+### Internal
+
+- Added an `AGENTS.md` with repository guidance for AI coding sessions.
+
 # Astra Monitor 43 - October 11 2026
 
 ### Intel GPU Monitoring

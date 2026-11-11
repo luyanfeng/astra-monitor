@@ -8,7 +8,7 @@
     "gettext-domain": "monitor@astraext.github.io",
     "license": "GPL-3.0-or-later",
     "version": 62,
-    "version-name": "43",
+    "version-name": "0.0.1",
     "donations": {
         "buymeacoffee": "astra.ext",
         "patreon": "AstraExt"
