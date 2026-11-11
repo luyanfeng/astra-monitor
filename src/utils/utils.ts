@@ -1425,50 +1425,6 @@ export default class Utils {
                     Utils.cachedLmSensorSources = lmSensorsSources;
                     sensors.push(...lmSensorsSources);
                 }
-
-                /*if((await Utils.getGPUsListAsync()).some(gpu => Utils.isAmdGpu(gpu))) {
-                    //TODO: add support for amdgpu_top sensors
-                    if(await Utils.hasAmdGpuTopAsync()) {
-                        const path = await Utils.getAmdGpuTopPathAsync();
-                        if(path !== false) {
-                            const stdoutString = await Utils.runAsyncCommandOptional(
-                                `${path}amdgpu_top -J -n 1`
-                            );
-
-                            if(stdoutString && stdoutString.length > 0) {
-                                const parsedData = JSON.parse(stdoutString);
-
-                                if(parsedData.devices && parsedData.devices.length > 0) {
-                                    for(const gpuId in parsedData.devices) {
-                                        const gpu = parsedData.devices[gpuId];
-
-                                        if(
-                                            Object.prototype.hasOwnProperty.call(gpu, 'Info') &&
-                                            Object.prototype.hasOwnProperty.call(
-                                                gpu.Info,
-                                                'DeviceName'
-                                            ) &&
-                                            Object.prototype.hasOwnProperty.call(gpu, 'Sensors')
-                                        ) {
-                                            for(const sensor in gpu.Sensors) {
-                                                Utils.log('sensor: ' + sensor);
-                                                sensors.push({
-                                                    value: {
-                                                        service: 'amdgpu_top',
-                                                        path: [gpuId, sensor],
-                                                    },
-                                                    text: gpu.Info.DeviceName + ' -> ' + sensor,
-                                                });
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                Utils.log('No AMD GPU data found or amdgpu_top command failed');
-                            }
-                        }
-                    }
-                }*/
             } catch(e: any) {
                 Utils.log('Error getting lm-sensors sources: ' + e);
             }
@@ -2118,13 +2074,6 @@ export default class Utils {
             let dir;
             try {
                 dir = Gio.File.new_for_path(path);
-
-                // Check if the directory exists
-                // This is blocking, no need to check
-                /*if(!dir.query_exists(null)) {
-                    reject(new Error('Directory does not exist'));
-                    return;
-                }*/
             } catch(e: any) {
                 reject(new Error(`Error creating directory object: ${e.message}`));
                 return;
@@ -2272,13 +2221,6 @@ export default class Utils {
             let file;
             try {
                 file = Gio.File.new_for_path(path);
-
-                // Check if the file exists
-                // This is blocking, no need to check
-                /*if(!file.query_exists(null)) {
-                    reject(new Error('File does not exist'));
-                    return;
-                }*/
             } catch(e: any) {
                 if(emptyOnFail) resolve('');
                 else reject(new Error(`Error creating file object: ${e.message}`));
@@ -2721,7 +2663,7 @@ export default class Utils {
                 (performance.mean * performance.count + time) / (performance.count + 1);
             performance.count++;
             Utils.log(
-                `${name} took ${performance.mean.toFixed(2)}ms (mean: ${performance.mean.toFixed(2)}ms)`
+                `${name} took ${time.toFixed(2)}ms (mean: ${performance.mean.toFixed(2)}ms)`
             );
             Utils.performanceMap?.set(name, {
                 start: GLib.get_monotonic_time(),
@@ -2793,7 +2735,7 @@ export default class Utils {
     }
 
     static configUpdateFixes() {
-        //Fix GPU domain missing (v9 => v10)
+        //Fix GPU domain missing
         const selectedGpu = Config.get_json('processor-menu-gpu');
         if(selectedGpu && selectedGpu.domain) {
             if(!selectedGpu.domain.includes(':')) {
@@ -2802,7 +2744,7 @@ export default class Utils {
             }
         }
 
-        //Fix default secondary color in memory bar (v15 => v16)
+        //Fix default secondary color in memory bar
         const graphColor2 = Config.get_string('memory-header-graph-color2');
         if(graphColor2 === 'rgba(214,29,29,1.0)') {
             Config.set('memory-header-graph-color2', 'rgba(29,172,214,0.3)', 'string');
@@ -2812,7 +2754,7 @@ export default class Utils {
             Config.set('memory-header-bars-color2', 'rgba(29,172,214,0.3)', 'string');
         }
 
-        //Fix GPU moved from processor (v19 => v20)
+        //Fix GPU moved from processor
         const processorMenuGpu = Config.get_json('processor-menu-gpu');
         let gpuMain = Config.get_json('gpu-main');
         if(processorMenuGpu && !gpuMain) {
@@ -2826,7 +2768,7 @@ export default class Utils {
             Config.set('processor-menu-gpu-color', '', 'string');
         }
 
-        //Fix headers-height moved to headers-height-override (v21 => v22)
+        //Fix headers-height moved to headers-height-override
         const height = Config.get_int('headers-height');
         if(height === 28) {
             Config.set('headers-height-override', 0, 'int');
@@ -2836,7 +2778,7 @@ export default class Utils {
             Config.set('headers-height', 0, 'int');
         }
 
-        //Fix GPU data default / migrate from gpu-main (v29 => v30, #233)
+        //Fix GPU data default / migrate from gpu-main
         //Must run before profiles snapshot so a new profile does not freeze '""'.
         gpuMain = Config.get_json('gpu-main');
         let gpuData = Config.get_json('gpu-data');
@@ -2850,7 +2792,7 @@ export default class Utils {
             Config.set('gpu-data', gpuData, 'json');
         }
 
-        //Heal stale gpu-data frozen into an existing profile snapshot (#233)
+        //Heal stale gpu-data frozen into an existing profile snapshot
         let profiles = Config.get_json('profiles');
         if(profiles) {
             const currentProfile = Config.get_string('current-profile') || 'default';
@@ -2869,7 +2811,7 @@ export default class Utils {
             }
         }
 
-        //Fix profiles missing (v24 => v25)
+        //Fix profiles missing
         if(!profiles) {
             profiles = {};
             const currentProfile = Config.get_string('current-profile') || 'default';
@@ -2877,7 +2819,7 @@ export default class Utils {
             Config.set('profiles', profiles, 'json');
         }
 
-        //migrate/clean experimental-features (v41 => v42)
+        //Migrate/clean experimental-features
         let experimentalFeatures = Config.get_json('experimental-features');
         if(!experimentalFeatures) {
             experimentalFeatures = [];

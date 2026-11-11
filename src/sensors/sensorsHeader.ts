@@ -328,7 +328,7 @@ export default GObject.registerClass(
             let value;
             let unit;
 
-            if(!node.attrs.value) return '-';
+            if(node.attrs.value === undefined) return '-';
             value = node.attrs.value;
 
             if(node.attrs.unit) unit = node.attrs.unit;

@@ -830,6 +830,7 @@ export default class PrefsUtils {
         tabs: number = 0
     ) {
         const monitors = Config.get_json(config);
+        if(!Array.isArray(monitors)) return;
         for(let index = 0; index < monitors.length; index++) {
             const item = monitors[index] || '';
             PrefsUtils.OrderingItem(item, index, monitors.length, config, group, tabs + 1);

@@ -108,7 +108,8 @@ export default class XMLParser {
 
                     if(this.xml[this.pos + 1] === '/') {
                         // Closing tag
-                        this.pos = this.xml.indexOf('>', this.pos) + 1;
+                        const endTag = this.xml.indexOf('>', this.pos);
+                        this.pos = endTag !== -1 ? endTag + 1 : this.xml.length;
                         const finishedObject = this.objStack.pop();
                         if(this.objStack.length === 0) {
                             // We closed the root tag
@@ -304,6 +305,12 @@ export default class XMLParser {
                 if(quoteChar === '"' || quoteChar === "'") {
                     this.pos++; // Move past opening quote
                     const endQuote = this.xml.indexOf(quoteChar, this.pos);
+                    if(endQuote === -1) {
+                        // truncated XML: unterminated attribute value, consume the rest of the document
+                        attrs[attrName] = this.xml.substring(this.pos);
+                        this.pos = this.xml.length;
+                        break;
+                    }
                     const attrValue = this.xml.substring(this.pos, endQuote);
                     attrs[attrName] = attrValue; // Assign string value
                     this.pos = endQuote + 1; // Move past closing quote

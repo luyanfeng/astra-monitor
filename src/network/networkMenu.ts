@@ -233,7 +233,7 @@ export default class NetworkMenu extends MenuBase {
     constructor(sourceActor: St.Widget, arrowAlignment: number, arrowSide: St.Side) {
         super(sourceActor, arrowAlignment, { name: 'Network Menu', arrowSide });
 
-        /*this.networkSectionLabel = */ this.addMenuSection(_('Network'));
+        this.addMenuSection(_('Network'));
         this.createActivitySection();
         this.createTopProcessesSection();
         this.createPublicIps();

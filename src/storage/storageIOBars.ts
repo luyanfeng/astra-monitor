@@ -69,8 +69,8 @@ export default GObject.registerClass(
             );
 
             this.updateBars([
-                [{ color: 0, value: readSpeed / maxReadSpeed }],
-                [{ color: 1, value: writeSpeed / maxWriteSpeed }],
+                [{ color: 0, value: maxReadSpeed > 0 ? readSpeed / maxReadSpeed : 0 }],
+                [{ color: 1, value: maxWriteSpeed > 0 ? writeSpeed / maxWriteSpeed : 0 }],
             ]);
         }
     }

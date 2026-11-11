@@ -211,30 +211,6 @@ export default GObject.registerClass(
                 this.remove_style_pseudo_class('active');
                 this.menu?.queueCloseLifecycle();
             }
-
-            return;
-
-            /*
-             * FUNCTION FROM TOPHAT: https://github.com/fflewddur/tophat
-             * Not really working on my end, it needs a deeper look
-             * Right now it's not a priority, menus are very short
-             * Keep it here for future reference
-            
-            // Setting the max-height won't do any good if the minimum height of the
-            // menu is higher then the screen; it's useful if part of the menu is
-            // scrollable so the minimum height is smaller than the natural height
-            const workArea = Main.layoutManager.getWorkAreaForMonitor(
-                Main.layoutManager.primaryIndex
-            );
-            const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scaleFactor;
-            const verticalMargins = this.menu.actor.margin_top + this.menu.actor.margin_bottom;
-
-            // The workarea and margin dimensions are in physical pixels, but CSS
-            // measures are in logical pixels, so make sure to consider the scale
-            // factor when computing max-height
-            const maxHeight = Math.round((workArea.height - verticalMargins) / scaleFactor);
-            this.menu.actor.style = `max-height: ${maxHeight}px;`;
-            */
         }
 
         createTooltip() {}

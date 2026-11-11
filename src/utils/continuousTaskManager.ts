@@ -63,7 +63,12 @@ export default class ContinuousTaskManager {
         this.output = '';
         this.exited = false;
         task.run(this.task.bind(this))
-            .catch(() => {
+            .catch((e: any) => {
+                if(e?.isCancelled) {
+                    console.log('Continuous task cancelled: ' + this.command);
+                } else {
+                    console.error('Continuous task failed: ' + this.command, e);
+                }
                 this.exit(task);
             })
             .finally(() => {
@@ -248,6 +253,10 @@ export default class ContinuousTaskManager {
                     }
                     this.readOutput(generation, cancellable, resolve, reject, stdout);
                 } else {
+                    if(this.output.length > 0) {
+                        this.callback({ result: this.output, exit: false });
+                        this.output = '';
+                    }
                     this.exit(generation);
                     try {
                         stdout.close(null);

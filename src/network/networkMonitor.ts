@@ -139,7 +139,15 @@ export default class NetworkMonitor extends Monitor {
             else this.stop();
         });
 
-        Config.connect(this, 'changed::network-update', this.restart.bind(this));
+        Config.connect(this, 'changed::network-update', () => {
+            this.restart();
+            // nethogs samples with -d interval baked into its command line: restart it
+            // so the new update frequency takes effect (caps mode only, pkexec stays manual)
+            if(this.nethogsRunHasCaps && this.isListeningFor('topProcesses')) {
+                this.stopNethogs();
+                this.startNethogs();
+            }
+        });
 
         // Manually ignored interfaces
         this.ignored = Config.get_json('network-ignored');
@@ -816,7 +824,10 @@ export default class NetworkMonitor extends Monitor {
                 for(const pair of pairs) {
                     if(pair.startsWith('IEEE')) info.IEEE = pair.split(':')[1];
                     else if(pair.startsWith('ESSID'))
-                        info.EESSID = pair.split(':')[1].replace(/^"|"$/g, '');
+                        info.EESSID = pair
+                            .substring(pair.indexOf(':') + 1)
+                            .trim()
+                            .replace(/^"|"$/g, '');
                     else if(pair.startsWith('Mode')) info.mode = pair.split(':')[1];
                     else if(pair.startsWith('Frequency')) info.frequency = pair.split(':')[1];
                     else if(pair.startsWith('Access Point'))
@@ -987,26 +998,46 @@ export default class NetworkMonitor extends Monitor {
         try {
             const output = data.result;
 
-            if(!output.startsWith('Refreshing:')) {
+            const refreshIndex = output.indexOf('Refreshing:');
+            if(refreshIndex === -1) {
                 //Not a data update
                 return;
             }
 
-            const lines = output.substring(output.indexOf('\n') + 1).split('\n');
+            const lines = output.substring(output.indexOf('\n', refreshIndex) + 1).split('\n');
             for(const line of lines) {
                 if(line === '') continue;
 
-                const fields = line.trim().split(/\s+/);
+                const trimmed = line.trim();
 
-                if(fields.length < 3) continue;
+                // nethogs separates fields with tabs; the first field may contain spaces
+                const lastTab = trimmed.lastIndexOf('\t');
+                const prevTab = lastTab === -1 ? -1 : trimmed.lastIndexOf('\t', lastTab - 1);
+                let info: string;
+                let sentField: string;
+                let receivedField: string;
+                if(prevTab !== -1) {
+                    info = trimmed.substring(0, prevTab).trim();
+                    sentField = trimmed.substring(prevTab + 1, lastTab).trim();
+                    receivedField = trimmed.substring(lastTab + 1).trim();
+                } else {
+                    const fields = trimmed.split(/\s+/);
+                    if(fields.length < 3) continue;
+                    info = fields[0];
+                    sentField = fields[1];
+                    receivedField = fields[2];
+                }
 
-                const processInfo = fields[0].replace(/^"|"$/g, '').split('/');
+                const processInfo = info.replace(/^"|"$/g, '').split('/');
                 const pid = parseInt(processInfo[processInfo.length - 2], 10);
 
                 if(Number.isNaN(pid)) continue;
 
                 const uid = parseInt(processInfo[processInfo.length - 1], 10);
                 if(Number.isNaN(uid)) continue;
+
+                // nethogs reports unattributed traffic (unknown TCP, connections) as pid/uid 0
+                if(pid === 0 && uid === 0) continue;
 
                 const cmd = processInfo.slice(0, -2).join('/');
                 const exec = Utils.extractCommandName(cmd);
@@ -1018,15 +1049,15 @@ export default class NetworkMonitor extends Monitor {
                     continue;
                 }
 
-                const uploadKB = parseFloat(fields[1].replace(/^"|"$/g, ''));
+                const uploadKB = parseFloat(sentField.replace(/^"|"$/g, ''));
                 if(Number.isNaN(uploadKB)) continue;
                 const upload = Math.floor(uploadKB * 1024);
 
-                const downloadKB = parseFloat(fields[2].replace(/^"|"$/g, ''));
+                const downloadKB = parseFloat(receivedField.replace(/^"|"$/g, ''));
                 if(Number.isNaN(downloadKB)) continue;
                 const download = Math.floor(downloadKB * 1024);
 
-                if(download === 0 && download === 0) continue;
+                if(upload === 0 && download === 0) continue;
 
                 const process = {
                     pid,
@@ -1039,8 +1070,8 @@ export default class NetworkMonitor extends Monitor {
 
             topProcesses.sort((a, b) => b.upload + b.download - (a.upload + a.download));
             topProcesses.splice(NetworkMonitor.TOP_PROCESSES_LIMIT);
-        } catch(e) {
-            /* EMPTY */
+        } catch(e: any) {
+            Utils.error('Error parsing nethogs output', e);
         }
 
         this.setUsageValue('topProcesses', topProcesses);

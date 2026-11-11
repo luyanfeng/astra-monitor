@@ -61,7 +61,7 @@ export default GObject.registerClass(
         protected tooltipItem!: TooltipItem;
 
         constructor() {
-            super('Processor Header');
+            super('GPU Header');
 
             this.buildIcon();
             this.buildActivityBar();
@@ -193,7 +193,7 @@ export default GObject.registerClass(
                     Config.get_int('gpu-header-activity-percentage-icon-alert-threshold') || 0;
                 const memoryThreshold =
                     Config.get_int('gpu-header-memory-percentage-icon-alert-threshold') || 0;
-                if(activityThreshold === 0 && memoryThreshold) {
+                if(activityThreshold === 0 && memoryThreshold === 0) {
                     if(alerts.size > 0) {
                         alerts.clear();
                         updateIconColor();

@@ -130,7 +130,7 @@ export default GObject.registerClass(
 
         buildIcon() {
             const defaultStyle = 'margin-left:2px;margin-right:4px;';
-            let iconSize = Config.get_int('storage-header-icon-size');
+            let iconSize = Config.get_int('processor-header-icon-size');
             iconSize = Math.max(8, Math.min(30, iconSize));
             this.icon = new St.Icon({
                 fallbackGicon: Utils.getLocalIcon('am-cpu-symbolic'),

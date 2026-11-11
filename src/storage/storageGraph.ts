@@ -124,7 +124,7 @@ export default GObject.registerClass(
             const label = new St.Label({ text: '', yAlign: Clutter.ActorAlign.END });
             this.historyGrid.attach(label, 2, 2, 1, 1);
 
-            const seconds = Utils.memoryMonitor.historyLength * Config.get_double('memory-update');
+            const seconds = Utils.storageMonitor.historyLength * Config.get_double('storage-update');
             const limitInMins = seconds / 60;
             const startLabel = (ngettext('%d min ago', '%d mins ago', limitInMins) as any).format(
                 limitInMins

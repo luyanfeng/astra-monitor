@@ -324,11 +324,12 @@ export default class Config {
 
         const keys = Object.keys(imported);
         for(const key of keys) {
-            Config.reset(key);
-
-            const value = imported[key];
-
             try {
+                if(!settings.settingsSchema.has_key(key)) continue;
+
+                Config.reset(key);
+
+                const value = imported[key];
                 const schema = settings.settingsSchema.get_key(key);
                 const type = schema.get_value_type();
 

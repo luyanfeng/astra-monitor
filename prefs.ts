@@ -364,18 +364,6 @@ export default class AstraMonitorPrefs extends ExtensionPreferences {
                 this.activateItem(btn);
             }
         );
-        /*PrefsUtils.addButtonRow(
-            {
-                title: _('Menu'),
-                tabs: 1,
-            },
-            gpu,
-            (btn) => {
-                if(navigation.content !== this.gpu.menuPage)
-                    navigation.set_content(this.gpu.menuPage);
-                this.activateItem(btn);
-            }
-        );*/
 
         // Memory
         let memoryDefaultBtn: Adw.ActionRow | null = null;
@@ -580,18 +568,6 @@ export default class AstraMonitorPrefs extends ExtensionPreferences {
                 this.activateItem(btn);
             }
         );
-        /*PrefsUtils.addButtonRow(
-            {
-                title: _('Menu'),
-                tabs: 1,
-            },
-            sensors,
-            (btn) => {
-                if(navigation.content !== this.sensors.menuPage)
-                    navigation.set_content(this.sensors.menuPage);
-                this.activateItem(btn);
-            }
-        );*/
 
         const aboutGroup = new Adw.PreferencesGroup({
             hexpand: true,
@@ -685,15 +661,6 @@ export default class AstraMonitorPrefs extends ExtensionPreferences {
 
         item.add_css_class('am-active');
         this.active = item;
-    }
-
-    // @ts-expect-error never used
-    private static applyCssToWidget(widget: Gtk.Widget, cssString: string) {
-        const cssProvider = new Gtk.CssProvider();
-        cssProvider.load_from_data(cssString, cssString.length);
-        widget
-            .get_style_context()
-            .add_provider(cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
 
     private static addCss(cssData: string) {

@@ -190,7 +190,6 @@ export default class StorageMonitor extends Monitor {
 
     private dataSources!: StorageDataSources;
 
-    //private disksCacheFilled: boolean = false;
     private disksCache: Map<string, DiskInfo>;
 
     constructor() {
@@ -629,7 +628,7 @@ export default class StorageMonitor extends Monitor {
 
             const buf = new GTop.glibtop_fsusage();
             let mnt = 0;
-            while(buf.blocks === 0 && mnt <= mountpoints.length)
+            while(buf.blocks === 0 && mnt < mountpoints.length)
                 GTop.glibtop_get_fsusage(buf, mountpoints[mnt++]);
 
             if(buf.blocks === 0) return false;
@@ -645,7 +644,7 @@ export default class StorageMonitor extends Monitor {
             });
             return true;
         } catch(e: any) {
-            /* EMPTY */
+            Utils.error('Error updating storage usage (GTop)', e);
         }
         return false;
     }
@@ -1058,7 +1057,19 @@ export default class StorageMonitor extends Monitor {
             const topProcesses = [];
 
             // iotop-c prints the numbers in the user's locale, e.g. '270,79'
-            const parseNumber = (value: string) => parseFloat(value.replace(',', '.'));
+            const parseNumber = (value: string) => {
+                const lastComma = value.lastIndexOf(',');
+                const lastDot = value.lastIndexOf('.');
+                if(lastComma > lastDot) {
+                    // decimal comma (e.g. '270,79' or '1.234,56') -> drop dots, comma becomes dot
+                    return parseFloat(value.replace(/\./g, '').replace(',', '.'));
+                }
+                if(lastDot > lastComma) {
+                    // decimal dot (e.g. '1,234.56') -> drop commas
+                    return parseFloat(value.replace(/,/g, ''));
+                }
+                return parseFloat(value);
+            };
 
             for(const line of lines) {
                 const fields = line.trim().split(/\s+/);

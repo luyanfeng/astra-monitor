@@ -1520,7 +1520,7 @@ class Edid {
         if(snStartIndex !== false) {
             let serialNumber = '';
             let snIndex = snStartIndex;
-            const endOfSnChar = ['a', '1', '0']; // hex representation of some terminators?
+            const endOfSnChar = ['a', '1', '0']; // terminator bytes 0x0a, 0x01, 0x00 as hex
             while(
                 snIndex < this.edidData.length &&
                 endOfSnChar.indexOf(this.edidData[snIndex].toString(16)) < 0
@@ -1873,7 +1873,9 @@ class Edid {
                 let modelname = '';
                 for(
                     let k = dtdIndex + 5;
-                    this.edidData[k] !== 0x0a && this.edidData[k] !== 0x00;
+                    k < dtdIndex + this.DTD_LENGTH &&
+                        this.edidData[k] !== 0x0a &&
+                        this.edidData[k] !== 0x00;
                     k++
                 ) {
                     const ch = String.fromCharCode(this.edidData[k]);

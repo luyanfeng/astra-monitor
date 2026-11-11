@@ -115,7 +115,7 @@ export default class MemoryMenu extends MenuBase {
     constructor(sourceActor: St.Widget, arrowAlignment: number, arrowSide: St.Side) {
         super(sourceActor, arrowAlignment, { name: 'Memory Menu', arrowSide });
 
-        /*this.memorySectionLabel = */ this.addMenuSection(_('Memory'));
+        this.addMenuSection(_('Memory'));
         this.addUsage();
         this.addTopProcesses();
         this.addSwap();

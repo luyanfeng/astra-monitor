@@ -238,9 +238,7 @@ export default class SensorsMonitor extends Monitor {
     reset() {
         this.updateSensorsDataTask?.cancel();
 
-        this.ignoredSensorsRegex = null;
-        this.ignoredSensorsCategoryRegex = null;
-        this.ignoredSensorsAttributeRegex = null;
+        // ignored sensors regexes are config-derived: keep them across stop/start cycles
     }
 
     override start() {
@@ -381,7 +379,8 @@ export default class SensorsMonitor extends Monitor {
                             deviceLabel = Utils.capitalize(split[0]);
                         else
                             deviceLabel =
-                                Utils.capitalize(split[0]) + ' - ' + split[1].replace(/}$/, '');
+                                Utils.capitalize(split[0]) +
+                                (split[1] ? ' - ' + split[1].replace(/}$/, '') : '');
 
                         if(
                             this.ignoredSensorsRegex !== null &&
@@ -435,6 +434,7 @@ export default class SensorsMonitor extends Monitor {
                                     );
                                     if(strValue !== null && strValue !== '') {
                                         let value = parseFloat(strValue);
+                                        if(Number.isNaN(value)) return;
 
                                         if(hwmonAttribute.type === 'temp') value /= 1000;
                                         else if(hwmonAttribute.type === 'in') value /= 1000;

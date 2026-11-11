@@ -557,12 +557,11 @@ export default class GpuMonitor extends Monitor {
 
             if(path === false) {
                 Utils.error('Failed to find amdgpu_top');
-                return;
+            } else {
+                this.updateAmdGpuTask.start(`${path}amdgpu_top -J -u 5 -s ${timer} -n 0`, {
+                    flush: { always: true },
+                });
             }
-
-            this.updateAmdGpuTask.start(`${path}amdgpu_top -J -u 5 -s ${timer} -n 0`, {
-                flush: { always: true },
-            });
         }
 
         let hasNvidia = false;
@@ -932,7 +931,7 @@ export default class GpuMonitor extends Monitor {
                     const toalData = gpuInfo.VRAM['Total VRAM'];
                     if(toalData && toalData.value && toalData.unit) {
                         const total = Utils.convertToBytes(toalData.value, toalData.unit);
-                        if(total >= 0) gpu.vram.total = total;
+                        if(total > 0) gpu.vram.total = total;
                     }
 
                     const usedData = gpuInfo.VRAM['Total VRAM Usage'];
@@ -941,7 +940,7 @@ export default class GpuMonitor extends Monitor {
                         if(used >= 0) gpu.vram.used = used;
                     }
 
-                    if(gpu.vram.total != null && gpu.vram.used != null)
+                    if(gpu.vram.total != null && gpu.vram.used != null && gpu.vram.total > 0)
                         gpu.vram.percent = (gpu.vram.used / gpu.vram.total) * 100;
 
                     for(const name in gpuInfo.VRAM) {
@@ -1656,7 +1655,7 @@ export default class GpuMonitor extends Monitor {
                             reservedData.unit
                         );
 
-                    if(gpu.vram.total !== undefined && gpu.vram.used !== undefined) {
+                    if(gpu.vram.total !== undefined && gpu.vram.used !== undefined && gpu.vram.total > 0) {
                         gpu.vram.percent = (gpu.vram.used / gpu.vram.total) * 100;
                         gpu.vram.pipes.push({
                             name: 'FB Memory Usage',

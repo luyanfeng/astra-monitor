@@ -613,20 +613,23 @@ export default class ProcessorMonitor extends Monitor {
             steal: steal,
         };
 
-        // Calculate the percentage of CPU usage
-        const cpuUsage = ((totalDelta - idleDelta) / totalDelta) * 100;
-        const userUsage = (userDelta / totalDelta) * 100;
-        const systemUsage = (systemDelta / totalDelta) * 100;
-        const idleUsage = (idleDelta / totalDelta) * 100;
+        // tickless idle: no clock ticks between samples -> all deltas are 0
+        const safeTotalDelta = totalDelta > 0 ? totalDelta : 1;
 
-        const rawUserUsage = (rawUserDelta / totalDelta) * 100;
-        const rawNiceUsage = (rawNiceDelta / totalDelta) * 100;
-        const rawSystemUsage = (rawSystemDelta / totalDelta) * 100;
-        const rawIdleUsage = (rawIdleDelta / totalDelta) * 100;
-        const rawIowaitUsage = (rawIowaitDelta / totalDelta) * 100;
-        const rawIrqUsage = (rawIrqDelta / totalDelta) * 100;
-        const rawSoftirqUsage = (rawSoftirqDelta / totalDelta) * 100;
-        const rawStealUsage = (rawStealDelta / totalDelta) * 100;
+        // Calculate the percentage of CPU usage
+        const cpuUsage = ((totalDelta - idleDelta) / safeTotalDelta) * 100;
+        const userUsage = (userDelta / safeTotalDelta) * 100;
+        const systemUsage = (systemDelta / safeTotalDelta) * 100;
+        const idleUsage = (idleDelta / safeTotalDelta) * 100;
+
+        const rawUserUsage = (rawUserDelta / safeTotalDelta) * 100;
+        const rawNiceUsage = (rawNiceDelta / safeTotalDelta) * 100;
+        const rawSystemUsage = (rawSystemDelta / safeTotalDelta) * 100;
+        const rawIdleUsage = (rawIdleDelta / safeTotalDelta) * 100;
+        const rawIowaitUsage = (rawIowaitDelta / safeTotalDelta) * 100;
+        const rawIrqUsage = (rawIrqDelta / safeTotalDelta) * 100;
+        const rawSoftirqUsage = (rawSoftirqDelta / safeTotalDelta) * 100;
+        const rawStealUsage = (rawStealDelta / safeTotalDelta) * 100;
 
         this.pushUsageHistory('cpuUsage', {
             total: cpuUsage,
@@ -814,11 +817,14 @@ export default class ProcessorMonitor extends Monitor {
         this.previousCpuCoresUsage[i].system = totalSystem;
         this.previousCpuCoresUsage[i].total = total;
 
+        // tickless idle: no clock ticks between samples -> all deltas are 0
+        const safeTotalDelta = totalDelta > 0 ? totalDelta : 1;
+
         // Calculate the percentage of CPU usage
-        const cpuUsage = ((totalDelta - idleDelta) / totalDelta) * 100;
-        const userUsage = (userDelta / totalDelta) * 100;
-        const systemUsage = (systemDelta / totalDelta) * 100;
-        const idleUsage = (idleDelta / totalDelta) * 100;
+        const cpuUsage = ((totalDelta - idleDelta) / safeTotalDelta) * 100;
+        const userUsage = (userDelta / safeTotalDelta) * 100;
+        const systemUsage = (systemDelta / safeTotalDelta) * 100;
+        const idleUsage = (idleDelta / safeTotalDelta) * 100;
 
         return {
             total: cpuUsage,
@@ -849,7 +855,7 @@ export default class ProcessorMonitor extends Monitor {
                     return Utils.readFileAsync(path)
                         .then(fileContent => {
                             if(fileContent) {
-                                if(Utils.isIntOrIntString(fileContent)) return Number.NaN;
+                                if(!Utils.isIntOrIntString(fileContent)) return Number.NaN;
                                 else return parseInt(fileContent, 10) / 1000;
                             } else {
                                 return Number.NaN;
@@ -901,9 +907,10 @@ export default class ProcessorMonitor extends Monitor {
         const cpuTimesPromises = pids.map(async pid => {
             try {
                 const stat = await Utils.readFileAsync('/proc/' + pid + '/stat');
-                const statParts = stat.split(' ');
-                const utime = parseInt(statParts[13], 10);
-                const stime = parseInt(statParts[14], 10);
+                // comm (field 2) can contain spaces; everything after the closing bracket is fixed-width
+                const fieldsAfterComm = stat.substring(stat.lastIndexOf(')') + 2).split(' ');
+                const utime = parseInt(fieldsAfterComm[11], 10);
+                const stime = parseInt(fieldsAfterComm[12], 10);
 
                 const nPid = parseInt(pid, 10);
                 if(nPid) return { nPid, cpuTime: { processTime: utime + stime, totalCpuTime } };
@@ -933,7 +940,8 @@ export default class ProcessorMonitor extends Monitor {
 
             const totalCpuTimeDiff = totalCpuTime - previousTotalCpuTime;
             const cpuTimeDiff = cpuTime.processTime - previousProcessTime;
-            const cpuUsagePercent = (cpuTimeDiff / totalCpuTimeDiff) * 100.0;
+            const cpuUsagePercent =
+                totalCpuTimeDiff > 0 ? (cpuTimeDiff / totalCpuTimeDiff) * 100.0 : 0;
 
             try {
                 let fileContent = await Utils.readFileAsync(`/proc/${pid}/cmdline`);
@@ -1043,7 +1051,8 @@ export default class ProcessorMonitor extends Monitor {
 
             const totalCpuTimeDiff = totalCpuTime - previousTotalCpuTime;
             const cpuTimeDiff = cpuTime.processTime - previousProcessTime;
-            const cpuUsagePercent = (cpuTimeDiff / totalCpuTimeDiff) * 100.0;
+            const cpuUsagePercent =
+                totalCpuTimeDiff > 0 ? (cpuTimeDiff / totalCpuTimeDiff) * 100.0 : 0;
 
             topProcesses.push({ process, cpu: cpuUsagePercent });
         }

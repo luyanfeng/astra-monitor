@@ -152,6 +152,7 @@ export default class Profiles {
             const newProfile = entry.text;
 
             if(!newProfile || newProfile === currentProfile || !profiles[currentProfile]) return;
+            if(profiles[newProfile]) return;
 
             profiles[newProfile] = profiles[currentProfile];
             delete profiles[currentProfile];
